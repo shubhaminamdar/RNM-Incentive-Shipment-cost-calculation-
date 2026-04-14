@@ -1,0 +1,26 @@
+*"======================================================================*
+*" Cursor patch for FM: Z_SCME_SCD_CREATE
+*" Purpose: Enable YP28 amount calculation using IM_CUMULATIVE_DIST
+*"======================================================================*
+*
+* [1] Add local variable in data declarations section
+* DATA: lv_cumulative_dist TYPE char20.
+*
+* [2] Before shipment pricing is triggered, export value to memory ID ZDIST
+* CLEAR lv_cumulative_dist.
+* lv_cumulative_dist = im_cumulative_dist.
+* IF lv_cumulative_dist IS NOT INITIAL.
+*   EXPORT lv_cumulative_dist TO MEMORY ID 'ZDIST'.
+* ENDIF.
+*
+* [3] Optional fallback: map to communication structure distance
+* IF im_cumulative_dist IS NOT INITIAL.
+*   komp-distz = im_cumulative_dist.
+* ENDIF.
+*
+* [4] After pricing/doc creation for each shipment, clear memory
+* FREE MEMORY ID 'ZDIST'.
+*
+*" Notes:
+*" - RV57A914 already imports MEMORY ID 'ZDIST' for condition type YP28.
+*" - RV64A913 uses KOMP-DISTZ logic; fallback mapping supports this path.
